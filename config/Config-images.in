@@ -269,6 +269,13 @@ menu "Target Images"
 		help
 		  Select the root filesystem partition size.
 
+	config TARGET_DATAFS_PARTSIZE
+		int "Data filesystem partition size (in MB) - overlay partition"
+		depends on GRUB_IMAGES || TARGET_ROOTFS_EXT4FS
+		default 256
+		help
+		  Select the data filesystem partition size.
+
 	config TARGET_ROOTFS_PARTNAME
 		string "Root partition on target device"
 		depends on GRUB_IMAGES

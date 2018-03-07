@@ -1,4 +1,4 @@
-# 
+#
 # Copyright (C) 2006-2012 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
@@ -42,8 +42,9 @@ ifneq ($(GRUB_TERMINALS),)
 endif
 
 SIGNATURE:=$(shell perl -e 'printf("%08x", rand(0xFFFFFFFF))')
-ROOTPART:=$(call qstrip,$(CONFIG_TARGET_ROOTFS_PARTNAME))
-ROOTPART:=$(if $(ROOTPART),$(ROOTPART),PARTUUID=$(SIGNATURE)-02)
+#ROOTPART:=$(call qstrip,$(CONFIG_TARGET_ROOTFS_PARTNAME))
+ROOTPART_A := PARTUUID=$(SIGNATURE)-02
+ROOTPART_B := PARTUUID=$(SIGNATURE)-03
 
 GRUB_TIMEOUT:=$(call qstrip,$(CONFIG_GRUB_TIMEOUT))
 
@@ -56,11 +57,11 @@ ifneq ($(CONFIG_GRUB_IMAGES),)
   BOOTOPTS:=$(call qstrip,$(CONFIG_GRUB_BOOTOPTS))
 
   define Image/cmdline/ext4
-    root=$(ROOTPART) rootfstype=ext4 rootwait
+    rootfstype=ext4 rootwait
   endef
 
   define Image/cmdline/squashfs
-    root=$(ROOTPART) rootfstype=squashfs rootwait
+    rootfstype=squashfs rootwait
   endef
 
   define Image/Build/grub2
@@ -82,11 +83,14 @@ ifneq ($(CONFIG_GRUB_IMAGES),)
 		-e 's#@CMDLINE@#$(strip $(call Image/cmdline/$(1)) $(BOOTOPTS) $(GRUB_CONSOLE_CMDLINE))#g' \
 		-e 's#@TIMEOUT@#$(GRUB_TIMEOUT)#g' \
 		-e 's#@ROOT@#$(GRUB_ROOT)#g' \
+		-e 's#@ROOTPART_A@#$(ROOTPART_A)#g' \
+		-e 's#@ROOTPART_B@#$(ROOTPART_B)#g' \
 		./grub.cfg > $(KDIR)/root.grub/boot/grub/grub.cfg
-	PADDING="$(CONFIG_TARGET_IMAGES_PAD)" SIGNATURE="$(SIGNATURE)" PATH="$(TARGET_PATH)" $(SCRIPT_DIR)/gen_image_generic.sh \
+	PADDING="$(CONFIG_TARGET_IMAGES_PAD)" SIGNATURE="$(SIGNATURE)" PATH="$(TARGET_PATH)" ./gen_dual_image_datafs.sh \
 		$(BIN_DIR)/$(IMG_PREFIX)-combined-$(1).img \
 		$(CONFIG_TARGET_KERNEL_PARTSIZE) $(KDIR)/root.grub \
 		$(CONFIG_TARGET_ROOTFS_PARTSIZE) $(KDIR)/root.$(1) \
+		$(CONFIG_TARGET_DATAFS_PARTSIZE) \
 		256
 	grub-bios-setup \
 		--device-map="$(KDIR)/grub2/device.map" \
