@@ -2,7 +2,29 @@
 # Copyright (C) 2006 OpenWrt.org
 # Copyright (C) 2010 Vertical Communications
 
+resize_sda4() {
+	[ -b /dev/sda4 ] || return
+
+	# check that we have small partition
+	[ `grep sda4 /proc/partitions | awk '{print $3}'` -lt 200000 ] && {
+		fdisk /dev/sda << EOF > /dev/null
+d
+4
+n
+p
+
+
+n
+w
+EOF
+		partx -u /dev/sda &> /dev/null
+		e2fsck -f /dev/sda4 &> /dev/null
+		resize2fs /dev/sda4 &> /dev/null
+	}
+}
+
 do_mount_root() {
+	resize_sda4
 	mount_root
 	boot_run_hook preinit_mount_root
 	[ -f /sysupgrade.tgz ] && {
