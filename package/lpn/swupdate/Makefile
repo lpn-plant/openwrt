@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2018 LPN Plant
+# Copyright (C) 2018 - 2019 LPN Plant
 #
 
 include $(TOPDIR)/rules.mk
@@ -19,6 +19,11 @@ PKG_LICENSE:=GPLv2
 PKG_LICENSE_FILES:=
 
 PKG_MAINTAINER:=Kamil Wcislo <kamil.wcislo@lpnplant.io>
+
+PKG_CONFIG_DEPENDS:= \
+  CONFIG_TARGET_SWU_IMAGE \
+  CONFIG_TARGET_SWU_ENCRYPTION_KEY_FILE \
+  CONFIG_TARGET_SWU_SIGN_KEY_FILE
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -51,8 +56,10 @@ define Build/Compile
 endef
 
 define Package/swupdate/conffiles
-	/etc/swu/swupdate.cfg
-	/etc/config/swupdate
+/etc/swu/swupdate.cfg
+/etc/swu/enc.key
+/etc/swu/public.pem
+/etc/config/swupdate
 endef
 
 define Package/swupdate/install
@@ -68,6 +75,13 @@ define Package/swupdate/install
 	$(INSTALL_DATA) files/etc/config/swupdate $(1)/etc/config/swupdate
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) files/etc/init.d/* $(1)/etc/init.d/
+
+ifeq ($(CONFIG_TARGET_SWU_IMAGE),y)
+	echo $(shell source ${TOPDIR}/${CONFIG_TARGET_SWU_ENCRYPTION_KEY_FILE} && \
+		echo "$${key} $${iv} $${salt}") > $(1)/etc/swu/enc.key
+
+	openssl rsa -in $(TOPDIR)/$(CONFIG_TARGET_SWU_SIGN_KEY_FILE) -out $(1)/etc/swu/public.pem -outform PEM -pubout
+endif
 
 	$(VERSION_SED_SCRIPT) \
 		$(1)/etc/swu/swupdate.cfg \
