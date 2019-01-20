@@ -1,5 +1,6 @@
 #
 # Copyright (C) 2006-2012 OpenWrt.org
+# Copyright (C) 2018-2019 LPN PLant
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -9,7 +10,7 @@ include $(INCLUDE_DIR)/image.mk
 
 export PATH=$(TARGET_PATH):/sbin
 
-GRUB2_MODULES = biosdisk boot chain configfile ext2 linux ls part_msdos reboot serial vga
+GRUB2_MODULES = biosdisk boot chain configfile echo ext2 loadenv linux ls part_msdos reboot serial test vga
 GRUB2_MODULES_ISO = biosdisk boot chain configfile iso9660 linux ls part_msdos reboot serial vga
 GRUB_TERMINALS =
 GRUB_SERIAL_CONFIG =
@@ -67,7 +68,8 @@ ifneq ($(CONFIG_GRUB_IMAGES),)
   define Image/Build/grub2
 	# left here because the image builder doesnt need these
 	$(INSTALL_DIR) $(KDIR)/root.grub/boot/grub $(KDIR)/grub2
-	$(CP) $(KDIR)/bzImage $(KDIR)/root.grub/boot/vmlinuz
+	$(CP) $(KDIR)/bzImage $(KDIR)/root.grub/boot/vmlinuz_0
+	$(CP) $(KDIR)/bzImage $(KDIR)/root.grub/boot/vmlinuz_1
 	grub-mkimage \
 		-p /boot/grub \
 		-d $(STAGING_DIR_HOST)/lib/grub/i386-pc \
@@ -86,6 +88,7 @@ ifneq ($(CONFIG_GRUB_IMAGES),)
 		-e 's#@ROOTPART_A@#$(ROOTPART_A)#g' \
 		-e 's#@ROOTPART_B@#$(ROOTPART_B)#g' \
 		./grub.cfg > $(KDIR)/root.grub/boot/grub/grub.cfg
+	$(CP) ./grubenv $(KDIR)/root.grub/boot/grub/grubenv
 	PADDING="$(CONFIG_TARGET_IMAGES_PAD)" SIGNATURE="$(SIGNATURE)" PATH="$(TARGET_PATH)" ./gen_dual_image_datafs.sh \
 		$(BIN_DIR)/$(IMG_PREFIX)-combined-$(1).img \
 		$(CONFIG_TARGET_KERNEL_PARTSIZE) $(KDIR)/root.grub \
@@ -174,6 +177,17 @@ define Image/Build/Initramfs
 	$(CP) $(KDIR)/bzImage-initramfs $(BIN_DIR)/$(IMG_PREFIX)-ramfs.bzImage
 endef
 
+define Image/Build/swu
+	$(CP) $(1) $(BIN_DIR)/vmlinuz
+	$(CP) $(2) $(BIN_DIR)/rootfs
+	./gen_swu_img.sh $(BIN_DIR)\
+		$(VERSION_NUMBER)-$(REVISION) \
+		$(VERSION_HWREV) \
+		$(TOPDIR)/$(CONFIG_TARGET_SWU_SIGN_KEY_FILE) \
+		$(TOPDIR)/$(CONFIG_TARGET_SWU_ENCRYPTION_KEY_FILE)
+	rm -f $(BIN_DIR)/vmlinuz $(BIN_DIR)/rootfs $(BIN_DIR)/sw-description $(BIN_DIR)/sw-description.sig
+endef
+
 define Image/Build
 	$(call Image/Build/$(1))
   ifneq ($(1),iso)
@@ -185,6 +199,9 @@ define Image/Build
 	$(CP) $(KDIR)/root.iso $(BIN_DIR)/$(IMG_PREFIX).iso
   endif
 	$(CP) $(KDIR)/bzImage $(BIN_DIR)/$(IMG_PREFIX)-vmlinuz
+ifeq ($(CONFIG_TARGET_SWU_IMAGE),y)
+	$(call Image/Build/swu,$(KDIR)/bzImage,$(KDIR)/root.$(1))
+endif
 	$(call Image/Build/gzip/$(1))
 ifeq ($(CONFIG_TARGET_ROOTFS_INITRAMFS),y)
 	$(call Image/Build/Initramfs)
