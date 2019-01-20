@@ -2350,6 +2350,7 @@ CONFIG_PACKAGE_libmpsse=y
 CONFIG_PACKAGE_lora-gateway=y
 # CONFIG_LORA_GW_INSTALL_TEST is not set
 CONFIG_PACKAGE_get-serial=y
+CONFIG_PACKAGE_lpnGate-default-config=y
 CONFIG_PACKAGE_packet-forwarder=y
 # CONFIG_PACKET_FW_INSTALL_TEST is not set
 CONFIG_PACKAGE_swupdate=y
