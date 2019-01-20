@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2018 LPN Plant
+# Copyright (C) 2018 - 2019 LPN Plant
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
