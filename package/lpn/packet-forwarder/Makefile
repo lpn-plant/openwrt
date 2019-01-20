@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2018 LPN Plant
+# Copyright (C) 2018 - 2019 LPN Plant
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -41,7 +41,7 @@ define Package/packet-forwarder/description
 endef
 
 define Package/swupdate/conffiles
-	/etc/config/lora_pkt_fwd
+/etc/config/lora_pkt_fwd
 endef
 
 GLOBAL_CONF_PATH=/etc/lora/global_conf.json
