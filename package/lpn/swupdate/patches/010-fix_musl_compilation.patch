@@ -1,0 +1,19 @@
+--- a/ipc/network_ipc.c
++++ b/ipc/network_ipc.c
+@@ -86,7 +86,7 @@ int ipc_postupdate(ipc_message *msg) {
+ 	ssize_t ret;
+ 	char* tmpbuf = NULL;
+ 	if (msg->data.instmsg.len > 0) {
+-		if ((tmpbuf = strndupa(msg->data.instmsg.buf,
++		if ((tmpbuf = strndup(msg->data.instmsg.buf,
+ 				msg->data.instmsg.len > sizeof(msg->data.instmsg.buf)
+ 				    ? sizeof(msg->data.instmsg.buf)
+ 				    : msg->data.instmsg.len)) == NULL) {
+@@ -98,6 +98,7 @@ int ipc_postupdate(ipc_message *msg) {
+ 	if (tmpbuf != NULL) {
+ 		strncpy(msg->data.instmsg.buf, tmpbuf, sizeof(msg->data.instmsg.buf));
+ 		msg->data.instmsg.len = strnlen(tmpbuf, sizeof(msg->data.instmsg.buf));
++		free(tmpbuf);
+ 	}
+ 	msg->magic = IPC_MAGIC;
+ 	msg->type = POST_UPDATE;

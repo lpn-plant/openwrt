@@ -1,0 +1,2 @@
+kernel  %V-%R
+rootfs  %V-%R

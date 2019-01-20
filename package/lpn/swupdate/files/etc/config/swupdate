@@ -1,0 +1,4 @@
+config surricata surricata
+        option url      'http://192.168.1.1:8080'
+        option id_pfx   'lpngate'
+        option id_cmd   '/usr/bin/get-serial'
