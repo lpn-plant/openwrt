@@ -1,0 +1,14 @@
+config LORA_GW_INSTALL_TEST
+    bool "Install test utilities"
+    depends on PACKAGE_lora-gateway
+    default n
+    help
+        Installs additional test utilities.
+        - test_loragw_cal
+        - test_loragw_gps
+        - test_loragw_hal
+        - test_loragw_reg
+        - test_loragw_spi
+        - util_pkt_logger
+        - util_spi_stress
+
