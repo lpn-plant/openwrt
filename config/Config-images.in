@@ -248,6 +248,30 @@ menu "Target Images"
 		bool "Pad images to filesystem size (for JFFS2)"
 		depends on GRUB_IMAGES
 
+	menuconfig TARGET_SWU_IMAGE
+		bool "Build swu upgrade image"
+		default n
+		help
+		  Build a SWU-type image (swupdate format)
+
+		config TARGET_SWU_ENCRYPTION_KEY_FILE
+			string "Encryption key file path"
+			depends on TARGET_SWU_IMAGE
+			default "target/linux/x86/image/keys/enc.key"
+			help
+			  Path to aes encryption key containing key, iv and salt.
+			  Created using this command:
+			    openssl enc -aes-256-cbc -k <PASSPHRASE> -P -md sha1
+
+		config TARGET_SWU_SIGN_KEY_FILE
+			string "Sign key file path"
+			depends on TARGET_SWU_IMAGE
+			default "target/linux/x86/image/keys/priv.pem"
+			help
+			  Path to private sign key.
+			  Created using this command:
+			    openssl genrsa -out priv.pem
+
 	config TARGET_IMAGES_GZIP
 		bool "GZip images"
 		depends on TARGET_IMAGES_PAD || TARGET_ROOTFS_EXT4FS || TARGET_x86
