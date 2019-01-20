@@ -1,0 +1,10 @@
+config PACKET_FW_INSTALL_TEST
+    bool "Install additional utilities"
+    depends on PACKAGE_packet-forwarder
+    default n
+    help
+        Installs additional test utilities.
+        - update_gwid.sh
+        - util_ack
+        - util_sink
+        - util_tx_test

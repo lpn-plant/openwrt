@@ -1,0 +1,87 @@
+#!/bin/sh /etc/rc.common
+# Basic init script
+#
+# Copyright (C) 2018 LPN Plant
+#
+
+START=99
+USE_PROCD=1
+PROG=/usr/bin/lora_pkt_fwd
+PIDFILE=/var/run/lora_pkt_fwd.pid
+LOCAL_CONF_PATH=/var/run/lora_pkt_fwd.conf
+
+start_service() {
+  local gateway_ID
+  local server_address
+  local serv_port_up
+  local serv_port_down
+  local keepalive_interval
+  local stat_interval
+  local push_timeout_ms
+  local forward_crc_valid
+  local forward_crc_error
+  local forward_crc_disabled
+
+  config_load 'lora_pkt_fwd'
+  config_get gateway_ID 'gateway' 'gateway_ID'
+  config_get server_address 'gateway' 'server_address' 'localhost'
+  config_get serv_port_up 'gateway' 'serv_port_up' '1680'
+  config_get serv_port_down 'gateway' 'serv_port_down' '1680'
+  config_get keepalive_interval 'gateway' 'keepalive_interval' '10'
+  config_get stat_interval 'gateway' 'stat_interval' '30'
+  config_get push_timeout_ms 'gateway' 'push_timeout_ms' '100'
+  config_get_bool forward_crc_valid 'gateway' 'forward_crc_valid' '1'
+  config_get_bool forward_crc_error 'gateway' 'forward_crc_error' '0'
+  config_get_bool forward_crc_disabled 'gateway' 'forward_crc_disabled' '0'
+
+  [ -n "${gateway_ID}" ] || {
+    gateway_ID=4c50$(cat /sys/class/net/eth0/address | tr -d ":")
+  }
+
+  if [ $forward_crc_valid -gt 0 ]; then
+    forward_crc_valid="true"
+  else
+    forward_crc_valid="false"
+  fi
+
+  if [ $forward_crc_error -gt 0 ]; then
+    forward_crc_error="true"
+  else
+    forward_crc_error="false"
+  fi
+
+  if [ $forward_crc_disabled -gt 0 ]; then
+    forward_crc_disabled="true"
+  else
+    forward_crc_disabled="false"
+  fi
+
+  cat << EOF > ${LOCAL_CONF_PATH}
+{
+    "gateway_conf": {
+        "gateway_ID": "${gateway_ID}",
+        "server_address": "${server_address}",
+        "serv_port_up": ${serv_port_up},
+        "serv_port_down": ${serv_port_down},
+        "keepalive_interval": ${keepalive_interval},
+        "stat_interval": ${stat_interval},
+        "push_timeout_ms": ${push_timeout_ms},
+        "forward_crc_valid": ${forward_crc_valid},
+        "forward_crc_error": ${forward_crc_error},
+        "forward_crc_disabled": ${forward_crc_disabled}
+    }
+}
+EOF
+
+  procd_open_instance lora_pkt_fwd
+  procd_set_param command ${PROG} ${LOCAL_CONF_PATH}
+
+  # respawn automatically if something died, be careful if you have an alternative process supervisor
+  # if process dies sooner than respawn_threshold, it is considered crashed and after 5 retries the service is stopped
+  procd_set_param respawn ${respawn_threshold:-3600} ${respawn_timeout:-5} ${respawn_retry:-5}
+
+  procd_set_param pidfile ${PIDFILE} # write a pid file on instance start and remote it on stop
+  procd_set_param stdout 1 # forward stdout of the command to logd
+  procd_set_param stderr 1 # same for stder
+  procd_close_instance
+}
