@@ -22,7 +22,6 @@ Build/Compile=
 define Package/lpnGate-default-config/install
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DATA) ./files/config/* $(1)/etc/config/
-	$(INSTALL_DATA) ./files/crontabs/root $(1)/etc/crontabs/root
 endef
 
 $(eval $(call BuildPackage,lpnGate-default-config))
