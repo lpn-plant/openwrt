@@ -89,3 +89,12 @@ EOF
   procd_set_param stderr 1 # same for stder
   procd_close_instance
 }
+
+reload_service() {
+  procd_send_signal lora_pkt_fwd
+  start_service
+}
+
+service_triggers() {
+  procd_add_reload_trigger "lora_pkt_fwd"
+}
