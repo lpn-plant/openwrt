@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=packet_forwarder
 PKG_VERSION:=4.0.1.2
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/lpn-plant/$(PKG_NAME).git
@@ -40,7 +40,7 @@ define Package/packet-forwarder/description
 	packet-forwarder is a reference gateway implementation.
 endef
 
-define Package/swupdate/conffiles
+define Package/packet-forwarder/conffiles
 /etc/config/lora_pkt_fwd
 endef
 
