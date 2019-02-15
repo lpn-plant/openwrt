@@ -1,0 +1,32 @@
+#!/bin/sh
+# Copyright (C) 2019 LPN Plant
+
+resize_ext_storage() {
+	local partdev diskdev
+
+	. /lib/upgrade/common.sh
+
+	if export_bootdevice && export_partdevice partdev 4; then
+		export_partdevice diskdev 0
+
+		# check that we have small partition
+		[ `grep $partdev /proc/partitions | awk '{print $3}'` -lt 100000 ] && {
+			echo "Resizing /dev/$partdev to cover empty space of the /dev/$diskdev"
+			fdisk /dev/$diskdev << EOF > /dev/null
+d
+4
+n
+p
+
+
+n
+w
+EOF
+			partx -u /dev/$diskdev &> /dev/null
+			e2fsck -f /dev/$partdev &> /dev/null
+			resize2fs /dev/$partdev &> /dev/null
+		}
+	fi
+}
+
+boot_hook_add preinit_main resize_ext_storage
