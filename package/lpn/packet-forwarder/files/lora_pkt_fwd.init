@@ -36,7 +36,11 @@ start_service() {
 
   [ -n "${gateway_ID}" ] || {
     gateway_ID=4c50$(cat /sys/class/net/eth0/address | tr -d ":")
+    uci_set 'lora_pkt_fwd' 'gateway' 'gateway_ID' "$gateway_ID"
+    uci_commit 'lora_pkt_fwd'
   }
+
+  logger -s -t lora_pkt_fwd -p daemon.notice "Using gateway ID: $gateway_ID"
 
   if [ $forward_crc_valid -gt 0 ]; then
     forward_crc_valid="true"
