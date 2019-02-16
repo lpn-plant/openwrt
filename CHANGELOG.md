@@ -3,7 +3,7 @@
 ## [Unreleased](https://github.com/lpn-plant/openwrt/compare/v18.06.1.2...lpnGate)
 
 ---
-## 2019-02-16: [18.06.1.1](https://github.com/lpn-plant/openwrt/compare/v18.06.1.1...v18.06.1.2)
+## 2019-02-16: [18.06.1.2](https://github.com/lpn-plant/openwrt/compare/v18.06.1.1...v18.06.1.2)
 
 ### Add
 
